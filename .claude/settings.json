@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx -v)",
+      "Bash(npm ls *)",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-11/TrainID_PTC.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-11/clsMobileTracking.xml'\\); print\\('ok'\\)\")",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c01.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c01.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c02.xml'\\); print\\('ok'\\)\")",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c04.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c04.xml'\\); print\\('ok'\\)\")",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c03.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c03.xml'\\); print\\('ok'\\)\")",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c06.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c06.xml'\\); print\\('ok'\\)\")",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c05.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c05.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c11.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c11.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c09.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET;ET.parse\\('_clusters/batch-01/clsComponentTrack.c10.xml'\\);print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET;ET.parse\\('_clusters/batch-01/clsComponentTrack.c11.xml'\\);print\\('ok'\\)\")",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c07.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c07.xml'\\); print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET;ET.parse\\('_clusters/batch-01/clsComponentTrack.c09.xml'\\);print\\('ok'\\)\")",
+      "Bash(python -c \"import xml.etree.ElementTree as ET; ET.parse\\(r'C:/Reforge-test/MRS-testing/reforge-testing-goal/reforge_output/MRS/_clusters/batch-01/clsComponentTrack.c14.xml'\\); print\\('ok'\\)\")",
+      "Bash(python3 merge_clusters.py)",
+      "Bash(python3 coverage_matrix.py)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -I)",
+      "Bash(python3 -I -c ' *)",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET; ET.parse\\('final.xml'\\); print\\('parse ok'\\)\")",
+      "Bash(wc -l B4_*.xml)",
+      "Bash(cp \"C:\\\\Users\\\\PRATIK~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\db3ad57460e9a2d6\\\\4990efc4-9cb4-4d96-9377-d72c811e9a23\\\\scratchpad\\\\B1chunks\\\\final.xml\" \"c:\\\\Reforge-test\\\\MRS-testing\\\\reforge-old\\\\reforge_output\\\\_clusters\\\\B1\\\\extraction-fragment.xml\")",
+      "Bash(python3 -c \"import xml.etree.ElementTree as ET, glob; [ET.parse\\(f\\) for f in glob.glob\\('*.xml'\\)]; print\\('ok'\\)\")",
+      "Bash(python3 \"C:/Users/PRATIK~1/AppData/Local/Temp/claude/db3ad57460e9a2d6/4990efc4-9cb4-4d96-9377-d72c811e9a23/scratchpad/convert.py\" \"C:/Users/PRATIK~1/AppData/Local/Temp/claude/db3ad57460e9a2d6/4990efc4-9cb4-4d96-9377-d72c811e9a23/scratchpad/B8_clsComponentSignal.xml\" \"C:/Users/PRATIK~1/AppData/Local/Temp/claude/db3ad57460e9a2d6/4990efc4-9cb4-4d96-9377-d72c811e9a23/scratchpad/B8_clsComponentSignal_conv.xml\")",
+      "Bash(python3 convert.py B8_clsComponentSignal.xml B8_clsComponentSignal_conv.xml)",
+      "Bash(mkdir -p \"c:\\\\Reforge-test\\\\MRS-testing\\\\reforge-old\\\\reforge_output\\\\_clusters\\\\B8\")",
+      "Bash(cp \"C:/Users/PRATIK~1/AppData/Local/Temp/claude/db3ad57460e9a2d6/4990efc4-9cb4-4d96-9377-d72c811e9a23/scratchpad/final_B8.xml\" \"c:\\\\Reforge-test\\\\MRS-testing\\\\reforge-old\\\\reforge_output\\\\_clusters\\\\B8\\\\extraction-fragment.xml\")",
+      "Bash(python3 -)",
+      "Bash(python3 _scripts/merge_clusters.py)",
+      "Bash(python3 generate_user_stories.py)",
+      "Bash(python3 compare.py)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\PratikThakur\\.claude\\projects\\c--Reforge-test-MRS-testing\\memory\\scratch"
+    ]
+  }
+}
