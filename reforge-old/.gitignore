@@ -1,0 +1,6 @@
+
+# Reforge Framework (runtime state)
+reforge_output/
+.reforge/memory/checkpoints/
+.reforge/memory/clarifications/
+.reforge/memory/logs/
