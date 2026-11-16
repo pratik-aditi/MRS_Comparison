@@ -1,0 +1,694 @@
+# /reforge.status
+
+> Show analysis progress, coverage statistics, and pending items
+
+## Command Syntax
+
+```
+/reforge.status [--detailed] [--json]
+```
+
+### Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `--detailed` | No | Show file-level progress details |
+| `--json` | No | Output status as JSON for tooling integration |
+
+## Overview
+
+This command provides visibility into the analysis state, showing:
+
+1. Analysis progress (if in progress)
+2. Extraction completion status by type
+3. Pending clarifications count
+4. Coverage statistics
+5. Resume capability status
+
+---
+
+## Workflow
+
+### Step 0: Check Prerequisites and Checkpoint
+
+Run the prerequisites script to resolve paths and check checkpoint state:
+
+```bash
+reforge-scripts check-prerequisites --json --include-checkpoint
+```
+
+This returns JSON with resolved variables:
+```json
+{"PROJECT_NAME":"...","REPO_ROOT":"...","PROJECT_OUTPUT_DIR":"...","CONFIG":"...","ANALYSIS_STATUS":"completed|not-found","AVAILABLE_EXTRACTIONS":[...],"CHECKPOINT":"/path|null","CLARIFICATIONS_DIR":"..."}
+```
+
+If a checkpoint exists, also run the checkpoint reader:
+
+```bash
+reforge-scripts checkpoint read --json
+```
+
+This returns:
+```json
+{"EXISTS":true,"TYPE":"analysis","TOTAL_FILES":1247,"PROCESSED_FILES":500,"CURRENT_FILE":"...","STARTED_AT":"...","ELAPSED_SECONDS":3600,"PERCENTAGE":40}
+```
+
+Use `$PROJECT_OUTPUT_DIR`, `$PROJECT_NAME`, `$CLARIFICATIONS_DIR` throughout subsequent steps.
+
+Assign subdirectory variables:
+```
+$ANALYSIS_DIR = $PROJECT_OUTPUT_DIR/analysis
+$EXTRACTIONS_DIR = $PROJECT_OUTPUT_DIR/extractions
+```
+
+### Step 0.5: Load Project Context
+
+If `.reforge/memory/project-context.md` exists, read it now. Use its contents as
+supplemental guidance throughout this command's execution:
+- **Technology Stack**: Informs language/framework detection and pattern recognition
+- **Domain Knowledge**: Provides business context for naming and categorization
+- **Analysis Guidelines**: Directs focus and exclusions beyond config.json
+- **Custom Rules**: Additional rules to follow alongside the constitution
+
+### Step 0.7: Check/Update Project Plan
+
+If `.reforge/memory/project-plan.md` exists, read it now.
+
+**Include in status report:**
+- Display plan progress: "📋 Project Plan: X/Y items complete (Z%)"
+- Per-section breakdown: Setup (X/3), \<Type\> (X/7) for each workflow group, Custom Tasks (X/N) if present
+- List next unchecked items as "Suggested next steps"
+
+This command does NOT mark any plan item complete — it is read-only.
+
+If `.reforge/memory/project-plan.md` does not exist, include in status report:
+"No project plan found. Run /reforge.plan to create one."
+
+### Step 0.8: Load Glossary (Optional)
+
+If `.reforge/memory/glossary.json` exists, read it now and record:
+- `glossary-version`: The `version` field
+- `glossary-entry-count`: The `entry-count` field
+- `glossary-generated`: The `generated` timestamp
+
+If `.reforge/memory/glossary.json` does not exist, skip this step silently.
+The glossary is optional — its absence MUST NOT affect command behavior.
+
+### Step 1: Check Analysis State
+
+Look for analysis outputs and checkpoints:
+
+1. **Check for active checkpoint:**
+   - Path: `.reforge/memory/checkpoints/analysis-checkpoint.xml`
+   - If exists: Analysis is in progress or interrupted
+
+2. **Check for completed analysis:**
+   - Path: `$ANALYSIS_DIR/analysis.xml` (also check legacy `$PROJECT_OUTPUT_DIR/analysis.xml`)
+   - If exists: Analysis has completed at least once
+
+3. **Check for extraction outputs:**
+   - `$EXTRACTIONS_DIR/business-rules.xml`
+   - `$EXTRACTIONS_DIR/database.xml`
+   - `$EXTRACTIONS_DIR/ui-flows.xml`
+   - `$EXTRACTIONS_DIR/workflows.xml`
+   - `$EXTRACTIONS_DIR/call-sites.xml`
+   - `$EXTRACTIONS_DIR/dependencies.xml`
+   - `$EXTRACTIONS_DIR/functional-requirements.xml`
+   - `$EXTRACTIONS_DIR/non-functional-requirements.xml`
+   - `$EXTRACTIONS_DIR/architecture.xml`
+   - `$EXTRACTIONS_DIR/issues.xml`
+
+4. **Check for pending clarifications:**
+   - Path: `$CLARIFICATIONS_DIR/*.xml`
+   - Count pending items
+
+### Step 2: Gather Statistics
+
+**If analysis checkpoint exists (in-progress):**
+
+Read checkpoint and calculate:
+- Total files discovered
+- Files processed
+- Files remaining
+- Current file being processed
+- Elapsed time
+- Estimated time remaining (based on average processing speed)
+
+**If analysis.xml exists (completed):**
+
+Read summary section and extract:
+- Total files analyzed
+- Languages breakdown
+- File types breakdown
+- Last analysis timestamp
+
+**For each extraction type:**
+
+If output file exists, count:
+- Total items extracted
+- High confidence items
+- Medium confidence items
+- Low confidence items (may need clarification)
+
+### Step 3: Generate Report
+
+#### Standard Output
+
+```
+=== Reforge Analysis Status ===
+Project: [project-name]
+Root: [root-path]
+
+--- Analysis Phase ---
+Status: [Not Started | In Progress | Completed]
+[If in progress:]
+  Progress: [X]% ([Y] of [Z] files)
+  Current: [current-file-path]
+  Elapsed: [HH:MM:SS]
+  Estimated remaining: [HH:MM:SS]
+[If completed:]
+  Completed: [timestamp]
+  Total files: [count]
+  Coverage: [X]%
+
+--- Extraction Status ---
+| Type           | Status      | Items | Confidence         |
+|----------------|-------------|-------|-------------------|
+| Business Rules | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| Database       | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| UI Flows       | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| Workflows      | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| Call Sites     | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| Dependencies   | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| Func. Req.     | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| Non-Functional | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| Architecture   | [status]    | [N]   | H:[x] M:[y] L:[z] |
+| Issues         | [status]    | [N]   | H:[x] M:[y] L:[z] |
+
+--- Glossary ---
+[If glossary loaded:]
+Status: Available
+Version: [glossary-version]
+Entries: [glossary-entry-count]
+Generated: [glossary-generated]
+[If glossary not loaded:]
+Status: Not Generated
+  Run /reforge.glossary to extract acronyms and abbreviations
+
+--- Clarifications ---
+Pending: [count] items
+[If any pending:]
+  Run /reforge.clarify to resolve ambiguities
+
+--- Derived Artifacts ---
+| Artifact             | Status      | Last Generated |
+|----------------------|-------------|----------------|
+| Codebase metrics     | [status]    | [timestamp]    |
+| Hotspot analysis     | [status]    | [timestamp]    |
+| Dead code report     | [status]    | [timestamp]    |
+| Traceability matrix  | [status]    | [timestamp]    |
+
+--- Generated Outputs ---
+| Artifact             | Status      | Last Generated |
+|----------------------|-------------|----------------|
+| Markdown docs        | [status]    | [timestamp]    |
+| User stories         | [status]    | [timestamp]    |
+| Data dictionary      | [status]    | [timestamp]    |
+| UML diagrams         | [status]    | [timestamp]    |
+| Effort estimate      | [status]    | [timestamp]    |
+| Migration playbook   | [status]    | [timestamp]    |
+| Tech recommendation  | [status]    | [timestamp]    |
+| Dashboard            | [status]    | [timestamp]    |
+
+--- Audit & Validation ---
+| Artifact             | Status      | Last Generated |
+|----------------------|-------------|----------------|
+| Validation report    | [status]    | [timestamp]    |
+| Security audit       | [status]    | [timestamp]    |
+
+--- Next Steps ---
+[Contextual recommendations based on current state]
+```
+
+#### Detailed Output (--detailed)
+
+Add file-level information:
+
+```
+--- File Analysis Details ---
+Completed files:
+  src/main/java/com/app/Service.java [completed]
+  src/main/java/com/app/Controller.java [completed]
+  ...
+
+Pending files:
+  src/main/java/com/app/Repository.java [pending]
+  src/main/java/com/app/Model.java [pending]
+  ...
+
+Skipped files:
+  node_modules/... [excluded by pattern]
+  build/... [excluded by pattern]
+  ...
+
+Files with errors:
+  src/legacy/BrokenFile.java [encoding-error]
+  ...
+```
+
+#### JSON Output (--json)
+
+```json
+{
+  "project": {
+    "name": "[project-name]",
+    "root": "[root-path]"
+  },
+  "analysis": {
+    "status": "completed|in-progress|not-started",
+    "progress": {
+      "total": 1000,
+      "processed": 1000,
+      "skipped": 50,
+      "errors": 2,
+      "percentage": 100
+    },
+    "timing": {
+      "started": "2024-01-15T10:00:00Z",
+      "completed": "2024-01-15T11:30:00Z",
+      "duration_seconds": 5400
+    },
+    "languages": {
+      "java": { "files": 500, "lines": 50000 },
+      "javascript": { "files": 300, "lines": 25000 }
+    }
+  },
+  "extractions": {
+    "business-rules": {
+      "status": "completed",
+      "count": 150,
+      "confidence": { "high": 100, "medium": 40, "low": 10 }
+    },
+    "database": {
+      "status": "not-started",
+      "count": 0
+    },
+    "ui-flows": {
+      "status": "not-started",
+      "count": 0
+    },
+    "workflows": {
+      "status": "not-started",
+      "count": 0
+    },
+    "call-sites": {
+      "status": "not-started",
+      "count": 0
+    },
+    "dependencies": {
+      "status": "not-started",
+      "count": 0
+    },
+    "functional-requirements": {
+      "status": "not-started",
+      "count": 0
+    },
+    "non-functional": {
+      "status": "not-started",
+      "count": 0
+    },
+    "architecture": {
+      "status": "not-started",
+      "count": 0
+    },
+    "issues": {
+      "status": "not-started",
+      "count": 0
+    }
+  },
+  "glossary": {
+    "status": "available|not-generated",
+    "version": "[version]",
+    "entry_count": 42,
+    "generated": "[timestamp]"
+  },
+  "clarifications": {
+    "pending": 5,
+    "resolved": 10
+  },
+  "generated": {
+    "markdown": {
+      "status": "not-generated"
+    },
+    "user-stories": {
+      "status": "not-generated"
+    }
+  }
+}
+```
+
+### Step 4: Provide Recommendations
+
+Based on current state, suggest next steps:
+
+**If analysis not started:**
+```
+Next steps:
+→ Run /reforge.analyze to start codebase inventory
+```
+
+**If analysis in progress:**
+```
+Next steps:
+→ Wait for analysis to complete, or
+→ Run /reforge.analyze --resume to continue if interrupted
+```
+
+**If analysis completed, no extractions:**
+```
+Next steps:
+→ Run /reforge.extract business-rules to extract business logic
+→ Run /reforge.extract database to extract data model
+→ Run /reforge.extract ui to extract UI components
+→ Run /reforge.extract workflows to trace execution paths
+→ Run /reforge.extract call-sites to extract method call relationships
+→ Run /reforge.extract dependencies to extract module dependency graphs
+→ Run /reforge.extract functional-requirements to extract functional requirements
+→ Run /reforge.extract non-functional to extract NFRs and security findings
+→ Run /reforge.extract architecture to extract architectural components
+→ Run /reforge.extract issues to extract bugs and technical debt
+```
+
+**If extractions completed, clarifications pending:**
+```
+Next steps:
+→ Run /reforge.clarify to resolve [N] pending ambiguities
+→ This will improve confidence levels across extractions
+```
+
+**If extractions completed, no clarifications:**
+```
+Next steps:
+→ Run /reforge.audit to verify extraction coverage completeness
+→ Run /reforge.generate markdown to create documentation
+→ Run /reforge.generate user-stories to create modernization backlog
+→ Run /reforge.generate uml to create diagrams
+```
+
+**If all complete:**
+```
+Analysis complete! All extractions and documentation generated.
+
+Available commands:
+→ /reforge.audit - Verify extraction coverage completeness
+→ /reforge.validate - Unified XML validation across all extractions
+→ /reforge.reanalyze [path] - Re-analyze specific files
+→ /reforge.generate [format] - Regenerate documentation
+→ /reforge.clarify - Review and update clarifications
+→ /reforge.metrics - Compute codebase quality metrics
+→ /reforge.hotspot - Identify risk hotspots
+→ /reforge.estimate - Generate effort estimates
+→ /reforge.migrate - Create migration playbook
+→ /reforge.security - Run security audit (OWASP/CWE)
+→ /reforge.trace - Build traceability matrix
+→ /reforge.dashboard - Generate interactive HTML dashboard
+→ /reforge.export [format] - Export to Jira, Azure DevOps, etc.
+→ /reforge.report - Generate status/milestone report
+```
+
+---
+
+## Status Values
+
+### Analysis Status
+
+| Status | Meaning |
+|--------|---------|
+| `not-started` | No analysis has been run |
+| `in-progress` | Analysis checkpoint exists, can be resumed |
+| `completed` | analysis.xml exists with completed status |
+| `partial` | Analysis completed but some files had errors |
+
+### Extraction Status
+
+| Status | Meaning |
+|--------|---------|
+| `not-started` | Extraction output file does not exist |
+| `completed` | Output file exists with items |
+| `partial` | Output exists but analysis has been updated since |
+
+### Generation Status
+
+| Status | Meaning |
+|--------|---------|
+| `not-generated` | Output does not exist |
+| `generated` | Output exists |
+| `stale` | Output exists but extractions have been updated since |
+
+---
+
+## Reading Progress from Checkpoint
+
+Checkpoint path: `.reforge/memory/checkpoints/analysis-checkpoint.xml`
+
+Extract:
+- `<progress><total-files>` → Total count
+- `<progress><processed-files>` → Completed count
+- `<progress><current-file>` → Currently processing
+- `<timing><started-at>` → Start timestamp
+- `<timing><elapsed-seconds>` → Time elapsed
+
+Calculate:
+- Percentage: `(processed / total) * 100`
+- Average time per file: `elapsed / processed`
+- Estimated remaining: `(total - processed) * average`
+
+---
+
+## Reading Statistics from Analysis Output
+
+Analysis path: `$ANALYSIS_DIR/analysis.xml`
+
+Extract from `<summary>`:
+- `total-files` attribute
+- `total-lines` attribute
+- `analyzed` attribute
+- `skipped` attribute
+- `<languages>/<language>` for each language
+- `<file-types>/<type>` for each type
+
+---
+
+## Reading Extraction Statistics
+
+For each extraction file, if it exists:
+
+**business-rules.xml:**
+- Count `<rule>` elements
+- Group by `@confidence` attribute
+
+**database.xml:**
+- Count `<entity>` and `<interaction>` elements
+- Group by `@confidence` attribute
+
+**ui-flows.xml:**
+- Count `<screen>` and `<component>` elements
+- Group by `@confidence` attribute
+
+**workflows.xml:**
+- Count `<workflow>` elements
+- Group by `@confidence` attribute
+
+**call-sites.xml:**
+- Count `<call>` elements
+- Group by `@confidence` attribute
+
+**dependencies.xml:**
+- Count `<dep-ref>` elements
+- Group by `@confidence` attribute
+
+**functional-requirements.xml:**
+- Count `<requirement>` elements
+- Group by `@confidence` attribute
+
+**non-functional-requirements.xml:**
+- Count `<requirement>` and `<finding>` elements
+- Group by `@confidence` attribute
+
+**architecture.xml:**
+- Count `<component>`, `<integration>`, and `<pattern>` elements
+- Group by `@confidence` attribute
+
+**issues.xml:**
+- Count `<bug>` and `<issue>` elements
+- Group by `@confidence` attribute
+
+**security-audit.xml:**
+- Count `<vulnerability>` elements
+- Group by `@confidence` attribute
+
+**Derived artifacts** (in `$PROJECT_OUTPUT_DIR/derived/`):
+
+**codebase-metrics.xml:**
+- Check for existence, report total modules analyzed
+
+**hotspot-analysis.xml:**
+- Count `<hotspot>` elements, report top risk score
+
+**dead-code-report.xml:**
+- Count `<dead-item>` elements
+
+**traceability-matrix.xml:**
+- Count `<trace>` elements, report orphan count
+
+**Generated artifacts** (in `$PROJECT_OUTPUT_DIR/generated/`):
+
+**effort-estimate.xml:**
+- Check for existence, report total estimated effort
+
+**migration-playbook.xml:**
+- Check for existence, report phase count and strategy distribution
+
+**tech-recommendation.xml:**
+- Check for existence, report recommendation count
+
+**dashboard.html:**
+- Check for existence, report generation timestamp
+
+**Audit artifacts** (in `$PROJECT_OUTPUT_DIR/audit/`):
+
+**validation-report.xml:**
+- Check for existence, report pass/fail counts
+
+---
+
+## Examples
+
+### Status After Fresh Analysis
+
+```
+User: /reforge.status
+
+Agent:
+=== Reforge Analysis Status ===
+Project: legacy-ecommerce
+Root: /opt/codebase
+
+--- Analysis Phase ---
+Status: Completed
+Completed: 2024-01-15T11:30:00Z
+Total files: 1,247
+Coverage: 100%
+
+--- Extraction Status ---
+| Type           | Status       | Items | Confidence         |
+|----------------|--------------|-------|-------------------|
+| Business Rules | Not Started  | -     | -                 |
+| Database       | Not Started  | -     | -                 |
+| UI Flows       | Not Started  | -     | -                 |
+| Workflows      | Not Started  | -     | -                 |
+| Call Sites     | Not Started  | -     | -                 |
+| Dependencies   | Not Started  | -     | -                 |
+| Func. Req.     | Not Started  | -     | -                 |
+| Non-Functional | Not Started  | -     | -                 |
+| Architecture   | Not Started  | -     | -                 |
+| Issues         | Not Started  | -     | -                 |
+
+--- Clarifications ---
+Pending: 0 items
+
+--- Generated Outputs ---
+| Artifact         | Status         | Last Generated |
+|------------------|----------------|----------------|
+| Markdown docs    | Not Generated  | -              |
+| User stories     | Not Generated  | -              |
+| Data dictionary  | Not Generated  | -              |
+| UML diagrams     | Not Generated  | -              |
+
+--- Next Steps ---
+→ Run /reforge.extract business-rules to extract business logic
+→ Run /reforge.extract database to extract data model
+→ Run /reforge.extract ui to extract UI components
+→ Run /reforge.extract workflows to trace execution paths
+→ Run /reforge.extract call-sites to extract method call relationships
+→ Run /reforge.extract dependencies to extract module dependency graphs
+→ Run /reforge.extract functional-requirements to extract functional requirements
+→ Run /reforge.extract non-functional to extract NFRs and security findings
+→ Run /reforge.extract architecture to extract architectural components
+→ Run /reforge.extract issues to extract bugs and technical debt
+```
+
+### Status During Analysis
+
+```
+User: /reforge.status
+
+Agent:
+=== Reforge Analysis Status ===
+Project: legacy-ecommerce
+Root: /opt/codebase
+
+--- Analysis Phase ---
+Status: In Progress
+Progress: 45% (562 of 1,247 files)
+Current: src/main/java/com/app/OrderService.java
+Elapsed: 00:32:15
+Estimated remaining: 00:39:28
+
+--- Next Steps ---
+→ Wait for analysis to complete, or
+→ Run /reforge.analyze --resume to continue if interrupted
+```
+
+### Status After Full Extraction
+
+```
+User: /reforge.status --detailed
+
+Agent:
+=== Reforge Analysis Status ===
+Project: legacy-ecommerce
+Root: /opt/codebase
+
+--- Analysis Phase ---
+Status: Completed
+Completed: 2024-01-15T11:30:00Z
+Total files: 1,247
+Coverage: 100%
+
+--- Extraction Status ---
+| Type           | Status    | Items | Confidence         |
+|----------------|-----------|-------|-------------------|
+| Business Rules | Completed | 156   | H:98 M:45 L:13    |
+| Database       | Completed | 89    | H:72 M:15 L:2     |
+| UI Flows       | Completed | 45    | H:38 M:5 L:2      |
+| Workflows      | Completed | 23    | H:18 M:4 L:1      |
+| Call Sites     | Not Started | -   | -                  |
+| Dependencies   | Not Started | -   | -                  |
+| Func. Req.     | Not Started | -   | -                  |
+| Non-Functional | Not Started | -   | -                  |
+| Architecture   | Not Started | -   | -                  |
+| Issues         | Not Started | -   | -                  |
+
+--- Clarifications ---
+Pending: 13 items
+  Run /reforge.clarify to resolve ambiguities
+
+--- File Analysis Details ---
+Languages:
+  Java: 650 files (52%)
+  JavaScript: 312 files (25%)
+  SQL: 125 files (10%)
+  HTML: 89 files (7%)
+  Other: 71 files (6%)
+
+Low confidence items requiring review:
+  - BR-045: Unclear discount calculation (src/pricing/Discount.java:78)
+  - BR-089: Magic number in validation (src/validate/OrderValidator.java:156)
+  - UI-012: Ambiguous button handler (webapp/orders/list.jsp:45)
+  ...
+
+--- Next Steps ---
+→ Run /reforge.clarify to resolve 13 pending ambiguities
+→ This will improve confidence levels across extractions
+```
